@@ -5,6 +5,7 @@ import logging
 import random
 import pandas as pd
 from enum import Enum
+from datetime import date
 
 from flask import Flask, request
 
@@ -15,11 +16,21 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-# TODO: horoscope on date
 # TODO: show protocole
 
 class Sign(Enum):
-    GEMINI = 'gemini'
+  ARIES = 'aries'
+  TAURUS = 'taurus'
+  GEMINI = 'gemini'
+  CANCER = 'cancer'
+  LEO = 'leo'
+  MAID = 'maid'
+  SCALES = 'scales'
+  SCORPIO = 'scorpio'
+  SAGITTARIUS = 'sagittarius'
+  CAPRICORN = 'capricorn'
+  AQUARIUS = 'aquarius'
+  PISCES = 'pisces'
 
 
 class NeuroHoroscopeDialog(Dialog):
@@ -44,7 +55,7 @@ class NeuroHoroscopeDialog(Dialog):
     def tell_horoscope_by_sign(self, alisa: Alisa, sign: Sign):
         alisa.tts_with_text("Ваш гороскоп на сегодня: \n")
         alisa.tts("sil<[200]>")
-        alisa.tts_with_text(self.get_random_horoscope(sign))
+        alisa.tts_with_text(self.get_horoscope(sign))
         if not alisa.get_user_state_object('sign'):
             alisa.suggest(self.one_of(['Запомнить знак']), 'save_user_sign', payload={'sign': sign.value})
         alisa.suggest(self.one_of(['Другой знак']), 'request_sign', payload={'reset_sign': True})
@@ -83,13 +94,26 @@ class NeuroHoroscopeDialog(Dialog):
 
         self.request_sign(alisa)
 
-    def get_random_horoscope(self, sign: Sign):
-        return horoscopes[sign].sample(n=1)['text'].iloc[0]
-
     def maybe(self, perc, value):
         if random.randint(0, 100) < perc:
             return value
         return ""
+
+    def get_horoscope(self, sign: Sign):
+        horo_by_date = self.get_horoscope_by_date(sign, date.today())
+        if horo_by_date is None:
+            return self.get_random_horoscope(sign)
+        else:
+            return horo_by_date
+
+    def get_horoscope_by_date(self, sign: Sign, date):
+        sign_df = horoscopes[sign]
+        if sign_df[sign_df.date == str(date)].empty:
+            return None
+        return sign_df[sign_df.date == str(date)].sample(n=1)['text'].iloc[0]
+
+    def get_random_horoscope(self, sign: Sign):
+        return horoscopes[sign].sample(n=1)['text'].iloc[0]
 
 
 def read_horoscope(sign: Sign):
