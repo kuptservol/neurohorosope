@@ -15,8 +15,11 @@ app = Flask(__name__)
 
 logging.basicConfig(level=logging.DEBUG)
 
-
 # TODO: show protocole
+
+signs = ['♈ Овен', '♉ Телец', '♊ Близнецы', '♋ Рак', '♌ Лев', '♍ Дева', '♎ Весы', '♏ Скорпион', '♐ Стрелец',
+         '♑ Козерог', '♒ Водолей', '♓ Рыбы']
+
 
 class Sign(Enum):
     ARIES = 'aries'
@@ -76,7 +79,9 @@ class NeuroHoroscopeDialog(Dialog):
         alisa.tts_with_text("Для какого знака зодиака рассказать гороскоп?")
         alisa.voice_button(self.on_intent('SIGN'), 'tell_user_sign')
         alisa.update_user_state('sign', None)
-        alisa.suggest(self.one_of(['Рыбы']), 'save_user_sign')
+
+        for sign in random.sample(signs, 4):
+            alisa.suggest(sign, 'tell_user_sign')
 
     def tell_user_sign(self, alisa: Alisa):
         sign = Sign(alisa.get_intent_slot_value('SIGN', 'sign'))
