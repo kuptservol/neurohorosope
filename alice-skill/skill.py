@@ -76,6 +76,7 @@ class NeuroHoroscopeDialog(Dialog):
         alisa.tts_with_text("Для какого знака зодиака рассказать гороскоп?")
         alisa.voice_button(self.on_intent('SIGN'), 'tell_user_sign')
         alisa.update_user_state('sign', None)
+        alisa.suggest(self.one_of(['Рыбы']), 'save_user_sign')
 
     def tell_user_sign(self, alisa: Alisa):
         sign = Sign(alisa.get_intent_slot_value('SIGN', 'sign'))
