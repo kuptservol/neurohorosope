@@ -19,25 +19,25 @@ logging.basicConfig(level=logging.DEBUG)
 # TODO: show protocole
 
 class Sign(Enum):
-  ARIES = 'aries'
-  TAURUS = 'taurus'
-  GEMINI = 'gemini'
-  CANCER = 'cancer'
-  LEO = 'leo'
-  MAID = 'maid'
-  SCALES = 'scales'
-  SCORPIO = 'scorpio'
-  SAGITTARIUS = 'sagittarius'
-  CAPRICORN = 'capricorn'
-  AQUARIUS = 'aquarius'
-  PISCES = 'pisces'
+    ARIES = 'aries'
+    TAURUS = 'taurus'
+    GEMINI = 'gemini'
+    CANCER = 'cancer'
+    LEO = 'leo'
+    MAID = 'maid'
+    SCALES = 'scales'
+    SCORPIO = 'scorpio'
+    SAGITTARIUS = 'sagittarius'
+    CAPRICORN = 'capricorn'
+    AQUARIUS = 'aquarius'
+    PISCES = 'pisces'
 
 
 class NeuroHoroscopeDialog(Dialog):
 
-    def handle_dialog(self, alisa):
+    def handle_dialog(self, alisa: Alisa):
         sign = alisa.get_user_state_object('sign')
-        reset_sign = alisa.get_button_payload_value('reset_sign')
+        reset_sign = alisa.get_button_payload_value('reset_sign') or alisa.has_intent('ANOTHER_SIGN')
         if sign and not reset_sign:
             return self.tell_horoscope_by_sign(alisa, Sign(sign))
 
@@ -54,11 +54,18 @@ class NeuroHoroscopeDialog(Dialog):
 
     def tell_horoscope_by_sign(self, alisa: Alisa, sign: Sign):
         alisa.tts_with_text("Ваш гороскоп на сегодня: \n")
-        alisa.tts("sil<[200]>")
+        alisa.tts("sil<[300]>")
         alisa.tts_with_text(self.get_horoscope(sign))
+
+        alisa.suggest(self.one_of(['Другой знак']), 'request_sign', payload={'reset_sign': True})
+        alisa.voice_button(self.on_intent('ANOTHER_SIGN'), 'request_sign')
+
         if not alisa.get_user_state_object('sign'):
             alisa.suggest(self.one_of(['Запомнить знак']), 'save_user_sign', payload={'sign': sign.value})
-        alisa.suggest(self.one_of(['Другой знак']), 'request_sign', payload={'reset_sign': True})
+            alisa.tts("sil<[300]>")
+            alisa.tts("Хотите услышать про другой знак или запомнить ваш?")
+            alisa.voice_button(self.on_intent('REMEMBER_SIGN'), 'save_user_sign')
+            alisa.add_to_session_state('prev_sign', sign.value)
 
     def greetings(self, alisa: Alisa):
         alisa.tts_with_text(
@@ -80,6 +87,8 @@ class NeuroHoroscopeDialog(Dialog):
 
     def save_user_sign(self, alisa: Alisa):
         sign = alisa.get_button_payload_value('sign')
+        if not sign:
+            sign = alisa.get_session_object('prev_sign')
         alisa.tts_with_text(
             "Запомнила. Теперь каждый раз при входе в навык я буду говорить ваш гороскоп. "
             "Гороскопы обновляются раз в сутки.")
