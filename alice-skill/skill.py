@@ -44,16 +44,7 @@ class NeuroHoroscopeDialog(Dialog):
         if sign and not reset_sign:
             return self.tell_horoscope_by_sign(alisa, Sign(sign))
 
-        if alisa.is_new_session():
-            return self.greetings(alisa)
-
-        handler = self.match(alisa)
-
-        if handler:
-            handler = getattr(self, handler, self.fallback)
-            return handler(alisa)
-        else:
-            return self.fallback(alisa)
+        return super().handle_dialog(alisa)
 
     def tell_horoscope_by_sign(self, alisa: Alisa, sign: Sign):
         alisa.tts_with_text("Ваш гороскоп на сегодня: \n")
@@ -69,6 +60,18 @@ class NeuroHoroscopeDialog(Dialog):
             alisa.tts("Хотите услышать про другой знак или запомнить ваш?")
             alisa.voice_button(self.on_intent('REMEMBER_SIGN'), 'save_user_sign')
             alisa.add_to_session_state('prev_sign', sign.value)
+
+    def help_message(self, alisa):
+        alisa.tts_with_text(
+            "У умею рассказывать гороскоп по вашему знаку зодиака. "
+            "Гороскопы сгенерированы нейросетью на текстах Сорокина и Пелевина")
+        self.request_sign(alisa)
+
+    def help(self, alisa):
+        self.help_message(alisa)
+
+    def what_you_can_do(self, alisa):
+        self.help_message(alisa)
 
     def greetings(self, alisa: Alisa):
         alisa.tts_with_text(

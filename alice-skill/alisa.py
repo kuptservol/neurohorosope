@@ -17,6 +17,12 @@ class Dialog:
         if alisa.is_new_session():
             return self.greetings(alisa)
 
+        if alisa.has_intent('YANDEX.HELP'):
+            return self.help(alisa)
+
+        if alisa.has_intent('YANDEX.WHAT_CAN_YOU_DO'):
+            return self.what_you_can_do(alisa)
+
         handler = self.match(alisa)
 
         if handler:
@@ -25,10 +31,13 @@ class Dialog:
         else:
             return self.fallback(alisa)
 
-    def greetings(self, alisa):
+    def help(self, alisa):
         pass
 
-    def help(self, alisa):
+    def what_you_can_do(self, alisa):
+        pass
+
+    def greetings(self, alisa):
         pass
 
     def fallback(self, alisa):
