@@ -64,7 +64,7 @@ class NeuroHoroscopeDialog(Dialog):
     def help_message(self, alisa):
         alisa.tts_with_text(
             "У умею рассказывать гороскоп по вашему знаку зодиака. "
-            "Гороскопы сгенерированы нейросетью на текстах Сорокина и Пелевина")
+            "Гороскопы сгенерированы нейросетью на текстах Сорокина и Пелевина. \n")
         self.request_sign(alisa)
 
     def help(self, alisa):
