@@ -165,8 +165,7 @@ class Alisa:
         if title_tts:
             show_item_meta['title_tts'] = title_tts
 
-        show_item_meta['publication_date'] = pub_date if pub_date is not None else datetime.now() \
-            .strftime("%Y-%m-%dT%H:%M:%S")
+        show_item_meta['publication_date'] = pub_date if pub_date is not None else datetime.now().isoformat()
         if exp_date:
             show_item_meta['exp_date'] = exp_date
 
