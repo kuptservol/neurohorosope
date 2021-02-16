@@ -15,8 +15,6 @@ app = Flask(__name__)
 
 logging.basicConfig(level=logging.DEBUG)
 
-# TODO: show protocole
-
 signs = ['♈ Овен', '♉ Телец', '♊ Близнецы', '♋ Рак', '♌ Лев', '♍ Дева', '♎ Весы', '♏ Скорпион', '♐ Стрелец',
          '♑ Козерог', '♒ Водолей', '♓ Рыбы']
 
@@ -34,6 +32,7 @@ class Sign(Enum):
     CAPRICORN = 'capricorn'
     AQUARIUS = 'aquarius'
     PISCES = 'pisces'
+    GENERAL = 'general'
 
 
 class NeuroHoroscopeDialog(Dialog):
@@ -60,6 +59,9 @@ class NeuroHoroscopeDialog(Dialog):
             alisa.tts("Хотите услышать про другой знак или запомнить ваш?")
             alisa.voice_button(self.on_intent('REMEMBER_SIGN'), 'save_user_sign')
             alisa.add_to_session_state('prev_sign', sign.value)
+
+    def handle_morning_show(self, alisa):
+        alisa.show_episode(text=self.get_horoscope(Sign.GENERAL))
 
     def help_message(self, alisa):
         alisa.tts_with_text(
@@ -153,7 +155,7 @@ def main():
         }
     }
 
-    dialog.handle_dialog(Alisa(request, response))
+    dialog.handle_dialog(Alisa(request.json, response))
 
     logging.info('Response: %r', response)
 

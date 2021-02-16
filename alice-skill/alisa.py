@@ -1,4 +1,6 @@
 import random
+from datetime import datetime
+from datetime import date
 
 
 class Condition:
@@ -14,6 +16,9 @@ class Dialog:
         }
 
     def handle_dialog(self, alisa):
+        if alisa.is_show_request():
+            return self.handle_morning_show(alisa)
+
         if alisa.is_new_session():
             return self.greetings(alisa)
 
@@ -30,6 +35,9 @@ class Dialog:
             return handler(alisa)
         else:
             return self.fallback(alisa)
+
+    def handle_morning_show(self, alisa):
+        pass
 
     def help(self, alisa):
         pass
@@ -67,7 +75,7 @@ class Dialog:
 
 class Alisa:
     def __init__(self, request, response):
-        self.event, self.answer, self.response = request.json, response['response'], response
+        self.event, self.answer, self.response = request, response['response'], response
         self.intents = self.event.get('request', {}).get('nlu', {}).get('intents', {})
         self.command = self.event.get('request', {}).get('command')
         self.state_session = self.event.get('state', {}).get('session', {})
@@ -77,6 +85,9 @@ class Alisa:
 
     def is_new_session(self):
         return self.event['session']['new']
+
+    def is_show_request(self):
+        return self.event['request']['type'] == "Show.Pull"
 
     def get_state(self):
         return self.event['state']
@@ -145,6 +156,24 @@ class Alisa:
             if button_transition:
                 transitions.append(button_transition)
         return transitions
+
+    def show_episode(self, text, episode_id=None, title=None, tts=None, title_tts=None, pub_date=None, exp_date=None):
+        show_item_meta = {}
+        show_item_meta['content_id'] = episode_id if episode_id is not None else str(date.today())
+        if title:
+            show_item_meta['title'] = title
+        if title_tts:
+            show_item_meta['title_tts'] = title_tts
+
+        show_item_meta['publication_date'] = pub_date if pub_date is not None else datetime.now() \
+            .strftime("%Y-%m-%dT%H:%M:%S")
+        if exp_date:
+            show_item_meta['exp_date'] = exp_date
+
+        self.answer['text'] = text
+        if tts:
+            self.answer['tts'] = tts
+        self.answer['show_item_meta'] = show_item_meta
 
     def tts_with_text(self, tts):
         self.answer['text'] = self.answer.get('text', '') + tts
