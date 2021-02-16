@@ -144,6 +144,23 @@ horoscopes = {sign: read_horoscope(sign) for sign in Sign}
 dialog = NeuroHoroscopeDialog()
 
 
+def handle_dialog_yacloud(request, context):
+    logging.info('Request: %r', request)
+
+    response = {
+        "version": request['version'],
+        "response": {
+            "end_session": False
+        }
+    }
+
+    dialog.handle_dialog(Alisa(request, response))
+
+    logging.info('Response: %r', response)
+
+    return response
+
+
 @app.route("/", methods=['POST'])
 def main():
     logging.info('Request: %r', request.json)
